@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>KOREJA – Kopi Rempah Jahe Merah</title>
+<style>
+:root{--bg:#f6efe6;--card:#fffaf3;--ink:#2b1a10;--mute:#7a6455;--line:#e3d3c0;--acc:#a8321f;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1a110b;--card:#251912;--ink:#f3e7d8;--mute:#b39d8a;--line:#3b2a1f;--acc:#e0644d}}
+:root[data-theme="dark"]{--bg:#1a110b;--card:#251912;--ink:#f3e7d8;--mute:#b39d8a;--line:#3b2a1f;--acc:#e0644d}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Georgia,"Times New Roman",serif}
+main{max-width:1000px;margin:0 auto;padding:20px 16px 32px}
+h1{margin:0;font-size:clamp(28px,6vw,44px);letter-spacing:.12em;color:var(--acc)}
+.sub{margin:4px 0 16px;color:var(--mute);font-family:system-ui,sans-serif;font-size:14px}
+.grid{display:grid;gap:16px;grid-template-columns:1.2fr 1fr}
+@media(max-width:760px){.grid{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden}
+#stage{height:min(70vh,560px);min-height:400px;cursor:grab;touch-action:pan-y}
+#stage canvas{display:block;width:100%;height:100%}
+.ctl{display:flex;gap:8px;padding:10px 14px;border-top:1px solid var(--line);font-family:system-ui,sans-serif;flex-wrap:wrap;align-items:center}
+.ctl button{border:1px solid var(--line);background:transparent;color:var(--ink);padding:6px 12px;border-radius:999px;font-size:13px;cursor:pointer}
+.ctl span{font-size:12px;color:var(--mute);margin-left:auto}
+.comp{padding:16px}
+.comp h2{margin:0 0 4px;font-size:20px}
+.row{margin:12px 0;font-family:system-ui,sans-serif;font-size:14px}
+.row .top{display:flex;justify-content:space-between;gap:8px}
+.bar{height:8px;border-radius:6px;background:var(--line);margin-top:5px;overflow:hidden}
+.bar i{display:block;height:100%;border-radius:6px}
+.note{font:12px system-ui,sans-serif;color:var(--mute);margin-top:14px;line-height:1.5}
+</style>
+</head>
+<body>
+<main>
+<h1>KOREJA</h1>
+<p class="sub">Kopi Rempah Jahe Merah · pouch aluminium foil ziplock · 20 g</p>
+<div class="grid">
+  <div class="card"><div id="stage"></div>
+    <div class="ctl"><button id="bf">Depan</button><button id="bb">Belakang</button><button id="ba">Putar otomatis</button><span>Seret untuk memutar</span></div></div>
+  <div class="card comp">
+    <h2>Komposisi per sachet (20 g)</h2>
+    <div id="rows"></div>
+    <div class="note">Kemasan: stand-up pouch aluminium foil dengan ziplock, isi 20 g. Penyeduhan: 20 g bubuk + 300 mL air panas (1:15), metode tubruk tanpa disaring.</div>
+  </div>
+</div>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+var items=[["Bubuk kopi Robusta",8,"#4a2a17"],["Gula aren bubuk",6,"#b8863b"],["Krimer nabati",3.5,"#d9c7a8"],["Bubuk jahe merah",2,"#a8321f"],["Bubuk kayu manis",0.5,"#8a4b2a"]];
+function fm(n){return String(n).replace(".",",");}
+document.getElementById("rows").innerHTML=items.map(function(r){var p=r[1]/20*100;
+return '<div class="row"><div class="top"><span>'+r[0]+'</span><b>'+fm(r[1])+' g · '+fm(p)+'%</b></div><div class="bar"><i style="width:'+p+'%;background:'+r[2]+'"></i></div></div>';}).join("");
+
+var el=document.getElementById("stage");
+var scene=new THREE.Scene();
+var cam=new THREE.PerspectiveCamera(38,1,0.1,100);cam.position.set(0,0.5,10);
+var rd=new THREE.WebGLRenderer({antialias:true,alpha:true});rd.setPixelRatio(Math.min(devicePixelRatio,2));el.appendChild(rd.domElement);
+scene.add(new THREE.HemisphereLight(0xfff4e6,0x4a3020,0.75));
+var d1=new THREE.DirectionalLight(0xffffff,0.8);d1.position.set(4,6,7);scene.add(d1);
+var d2=new THREE.DirectionalLight(0xffd9a8,0.5);d2.position.set(-6,2,-5);scene.add(d2);
+var pl=new THREE.PointLight(0xffffff,0.6,30);pl.position.set(-3,3,6);scene.add(pl);
+
+
+
+function silver(g){var s=g.createLinearGradient(0,0,600,900);s.addColorStop(0,"#eceff2");s.addColorStop(.5,"#aeb4ba");s.addColorStop(1,"#e1e5e9");g.fillStyle=s;g.fillRect(0,0,600,900);for(var j=0;j<7;j++){g.fillStyle="rgba(0,0,0,.16)";g.fillRect(0,8+j*8,600,2);g.fillStyle="rgba(255,255,255,.55)";g.fillRect(0,11+j*8,600,2);}}
+// front print
+var fc=document.createElement("canvas");fc.width=1200;fc.height=1800;var g=fc.getContext("2d");g.scale(2,2);
+silver(g);
+var gr=g.createLinearGradient(0,190,0,900);gr.addColorStop(0,"#2a140a");gr.addColorStop(.6,"#4a1d12");gr.addColorStop(1,"#7a2415");
+g.fillStyle=gr;g.fillRect(0,190,600,710);
+var GOLD="#e2b565";g.fillStyle=GOLD;g.fillRect(0,190,600,5);g.textAlign="center";
+g.font="bold 104px Georgia,serif";g.fillText("KOREJA",300,335);
+g.font="italic 34px Georgia,serif";g.fillText("Kopi Rempah Jahe Merah",300,390);
+g.beginPath();g.arc(300,550,105,0,7);g.fillStyle="#f3e2c2";g.fill();
+g.fillStyle="#4a2a17";g.beginPath();g.ellipse(300,550,58,80,0.35,0,7);g.fill();
+g.strokeStyle="#f3e2c2";g.lineWidth=9;g.beginPath();g.moveTo(268,484);g.bezierCurveTo(325,525,270,570,328,616);g.stroke();
+g.fillStyle=GOLD;g.font="28px Georgia,serif";
+g.fillText("Robusta · Jahe Merah · Kayu Manis",300,725);
+g.fillText("Gula Aren · Krimer Nabati",300,765);
+g.font="bold 30px Georgia,serif";g.fillText("NET 20 g",300,850);
+// back print
+var kc=document.createElement("canvas");kc.width=1200;kc.height=1800;var k=kc.getContext("2d");k.scale(2,2);
+silver(k);k.fillStyle="#2a140a";k.textAlign="center";
+k.font="bold 44px Georgia,serif";k.fillText("KOMPOSISI",300,300);
+k.font="30px Georgia,serif";
+items.forEach(function(r,i){var y=370+i*46;k.textAlign="left";k.fillText(r[0],80,y);k.textAlign="right";k.fillText(fm(r[1])+" g",520,y);});
+k.textAlign="center";k.font="bold 34px Georgia,serif";k.fillText("CARA SEDUH",300,650);
+k.font="28px Georgia,serif";k.fillText("20 g bubuk + 300 mL air panas",300,698);k.fillText("Aduk rata, sajikan (tubruk)",300,738);
+k.font="bold 30px Georgia,serif";k.fillText("KOREJA · NET 20 g",300,840);
+
+function tx(c){var t=new THREE.CanvasTexture(c);t.anisotropy=rd.capabilities.getMaxAnisotropy();return t;}
+function mat(c){return new THREE.MeshPhongMaterial({map:tx(c),specular:0x999999,shininess:60});}
+
+// pouch panel with stand-up bulge
+var W=2.4,H=3.6,YB=-1.8,YF=1.0,BZ=0.45;
+var geo=new THREE.PlaneGeometry(W,H,60,90);var p=geo.attributes.position;
+for(var i=0;i<p.count;i++){var x=p.getX(i),y=p.getY(i),u=Math.min(1,Math.abs(x)/(W/2)),z=0;
+if(y<YF){var t=(y-YB)/(YF-YB);z=BZ*Math.sqrt(1-u*u)*Math.pow(1-t,0.8);}p.setZ(i,z);}
+geo.computeVertexNormals();
+var pouch=new THREE.Group();
+var fr=new THREE.Mesh(geo,mat(fc));var bk=new THREE.Mesh(geo,mat(kc));bk.rotation.y=Math.PI;
+pouch.add(fr,bk);
+var cap=new THREE.Mesh(new THREE.CircleGeometry(1,40),new THREE.MeshPhongMaterial({color:0x6b5a50,shininess:40,side:THREE.DoubleSide}));
+cap.scale.set(1.2,BZ,1);cap.rotation.x=Math.PI/2;cap.position.y=YB;pouch.add(cap);
+// ziplock bars
+var zm=new THREE.MeshPhongMaterial({color:0xf2f5f7,shininess:90});
+[1,-1].forEach(function(s){var z=new THREE.Mesh(new THREE.CylinderGeometry(0.035,0.035,2.34,12),zm);z.rotation.z=Math.PI/2;z.position.set(0,1.22,s*0.03);pouch.add(z);});
+pouch.position.y=0.05;scene.add(pouch);
+
+// shadow
+var sc=document.createElement("canvas");sc.width=sc.height=256;var sg=sc.getContext("2d");
+var rg=sg.createRadialGradient(128,128,0,128,128,128);rg.addColorStop(0,"rgba(0,0,0,.5)");rg.addColorStop(1,"rgba(0,0,0,0)");sg.fillStyle=rg;sg.fillRect(0,0,256,256);
+var sh=new THREE.Mesh(new THREE.PlaneGeometry(6.5,3.6),new THREE.MeshBasicMaterial({map:new THREE.CanvasTexture(sc),transparent:true,depthWrite:false}));
+sh.rotation.x=-Math.PI/2;sh.position.set(0,-1.81,0.6);scene.add(sh);
+
+// props
+var props=new THREE.Group();scene.add(props);
+var mound=new THREE.Mesh(new THREE.SphereGeometry(1,24,12),new THREE.MeshStandardMaterial({color:0x5b3520,roughness:1}));
+mound.scale.set(1.5,.22,1);mound.position.set(0,-1.78,1.55);props.add(mound);
+var bm=new THREE.MeshStandardMaterial({color:0x3b2314,roughness:.55});
+for(var q=0;q<14;q++){var bean=new THREE.Mesh(new THREE.SphereGeometry(.17,14,10),bm);bean.scale.set(1,1.4,.7);
+var a=q*.9,rr=1.8+(q%4)*.3;bean.position.set(Math.cos(a)*rr,-1.7+(q%3)*.04,Math.sin(a)*rr*.5+1.3);bean.rotation.set(Math.random()*3,Math.random()*3,Math.random()*3);props.add(bean);}
+var cm=new THREE.MeshStandardMaterial({color:0xa4562c,roughness:.8});
+[[-2.0,-1.7,1.9,.5],[-1.7,-1.68,2.2,-.3]].forEach(function(s){var m=new THREE.Mesh(new THREE.CylinderGeometry(.09,.09,1.7,14),cm);m.rotation.z=Math.PI/2;m.rotation.y=s[3];m.position.set(s[0],s[1],s[2]);props.add(m);});
+var gm=new THREE.MeshStandardMaterial({color:0xb5483a,roughness:.7});
+[[1.9,-1.62,1.9],[2.25,-1.64,1.5],[1.6,-1.66,2.3]].forEach(function(s,i){var m=new THREE.Mesh(new THREE.IcosahedronGeometry(.3,1),gm);m.scale.set(1.5,.8,.9);m.position.set(s[0],s[1],s[2]);m.rotation.y=i;props.add(m);});
+
+// interaction
+var drag=false,px=0,ry=-0.45,auto=true,goal=null;
+el.addEventListener("pointerdown",function(e){drag=true;goal=null;px=e.clientX;el.setPointerCapture(e.pointerId);el.style.cursor="grabbing";});
+el.addEventListener("pointerup",function(){drag=false;el.style.cursor="grab";});
+el.addEventListener("pointermove",function(e){if(!drag)return;ry+=(e.clientX-px)*0.01;px=e.clientX;});
+function face(off){auto=false;goal=Math.round(ry/(2*Math.PI))*2*Math.PI+off;}
+document.getElementById("bf").onclick=function(){face(0);};
+document.getElementById("bb").onclick=function(){face(Math.PI);};
+document.getElementById("ba").onclick=function(){auto=!auto;};
+function size(){var w=el.clientWidth,h=el.clientHeight;rd.setSize(w,h);cam.aspect=w/h;cam.updateProjectionMatrix();}
+addEventListener("resize",size);size();
+function loop(t){requestAnimationFrame(loop);
+if(goal!==null){ry+=(goal-ry)*0.12;if(Math.abs(goal-ry)<0.002){ry=goal;goal=null;}}
+else if(auto&&!drag)ry+=0.004;
+pouch.rotation.y=ry;pouch.position.y=0.05+Math.sin(t/900)*0.04;props.rotation.y=ry*0.1;rd.render(scene,cam);}
+loop(0);
+</script>
+</body>
+</html>
